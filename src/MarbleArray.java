@@ -41,9 +41,9 @@ public class MarbleArray {
 	
 	private boolean checkPosition(Marble m) {
 		if(m.isFixed()) {
-			return fixedMarbles.contains(m.getArrayCoordinates());
+			return !fixedMarbles.contains(m.getArrayCoordinates());
 		} else if(m.isXOR()) {
-			return checkXORPositions(m.getArrayCoordinates());
+			return !checkXORPositions(m.getArrayCoordinates());
 		} else {
 			Coordinates test = m.advance().getArrayCoordinates();
 			return !forbiddenPos.contains(test) && !fixedMarbles.contains(test) && !checkXORPositions(test);
@@ -89,6 +89,7 @@ public class MarbleArray {
 		return result;
 	}
 	
+	//Constructor for brute-forcing. No restrictions on marble positions
 	public MarbleArray(int length, int boardDim) {
 		if(length >= 1) {
 			marbles = new Marble[length];
@@ -97,6 +98,35 @@ public class MarbleArray {
 				marbles[i] = marbles[i-1].advance();
 			}
 		}	
+	}
+	
+	public MarbleArray(int length, int boardDim, ArrayList<Coordinates> forbidden, ArrayList<Coordinates> fixed, ArrayList <XORMarble> xor) {
+		forbiddenPos = forbidden;
+		fixedMarbles = fixed;
+		xorPos = xor;
+		if(length >= 1) {
+			marbles = new Marble[length];
+			int i = 0;
+			//This works, because the sum of the list sizes for fixed and XOR-marbles should always be <= the size of the marble array
+			for(; i < fixedMarbles.size(); i++) {
+				marbles[i] = new Marble(fixedMarbles.get(i).getFirst(), fixedMarbles.get(i).getSecond(), boardDim, true);
+			}
+			for(; i < xorPos.size(); i++) {
+				marbles[i] = new Marble(xorPos.get(i), boardDim);
+			}
+			if(i == 0) {
+				marbles[0] = new Marble(0,0, boardDim);
+				while(!checkPosition(marbles[0])) {
+					marbles[0] = marbles[0].advance();
+				}
+			}
+			for(; i < length; i++) {
+				marbles[i] = marbles[i-1].advance();
+				while(!checkPosition(marbles[i])) {
+					marbles[i] = marbles[i].advance();
+				}
+			}
+		}
 	}
 
 }
