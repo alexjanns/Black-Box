@@ -21,16 +21,16 @@ public class BlackBox {
 		sample.add(new Coordinates(17));
 		sample.add(new Coordinates(18,18));
 		sample.add(new Coordinates(19));
-		
+
 		Scanner scanner = new Scanner(System.in);
 		String in;
 		do {
 			System.out.println("Would you like to load a file? Y/N");
 			in = scanner.nextLine();
 		} while(!in.equals("Y") && !in.equals("y") && !in.equals("N") && !in.equals("n")); 
-		
+
 		if(in.equals("Y") || in.equals("y")) {
-			System.out.println("Specify file to read:");
+			System.out.println("Please specify file to read:");
 			in = scanner.nextLine();
 			CoordinateListParser parser = new CoordinateListParser(in);
 			ArrayList<Coordinates> input = parser.getInputList();
@@ -38,17 +38,42 @@ public class BlackBox {
 			for(int i = 0; i < input.size(); i++) {
 				System.out.println(input.get(i).toString());
 			}
-			System.out.println("Solving using brute force method. Press Enter to continue.");
-			scanner.nextLine();
-			Solver solver = new Solver(input);
-			solver.solve();
+
+			do {
+				System.out.println("Would you Like to solve using [B]rute Force or [P]reprocessing?");
+				in = scanner.nextLine();
+			} while(!in.equals("B") && !in.equals("b") && !in.equals("P") && !in.equals("p"));
+			if(in.equals("B") || in.equals("b")) {
+				System.out.println("Solving using brute force method. Press Enter to continue.");
+				scanner.nextLine();
+				Solver solver = new Solver(input);
+				solver.solveBruteForce();
+			} else {
+				System.out.println("Solving with preprocessing. Press Enter to continue.");
+				scanner.nextLine();
+				Solver solver = new Solver(input);
+				solver.solvePreprocessing();
+			}
+
 		} else {
-			System.out.println("Proceeding with sample input. Using brute force method. Press Enter to continue.");
-			scanner.nextLine();
-			Solver solver = new Solver(sample);
-			solver.solve();
+			System.out.println("Proceeding with sample input.");
+			do {
+				System.out.println("Would you Like to solve using [B]rute Force or [P]reprocessing?");
+				in = scanner.nextLine();
+			} while(!in.equals("B") && !in.equals("b") && !in.equals("P") && !in.equals("p"));
+			if(in.equals("B") || in.equals("b")) {
+				System.out.println("Solving using brute force method. Press Enter to continue.");
+				scanner.nextLine();
+				Solver solver = new Solver(sample);
+				solver.solveBruteForce();
+			} else {
+				System.out.println("Solving with preprocessing. Press Enter to continue.");
+				scanner.nextLine();
+				Solver solver = new Solver(sample);
+				solver.solvePreprocessing();
+			}
 		}
-		
+
 		scanner.close();
 
 	}

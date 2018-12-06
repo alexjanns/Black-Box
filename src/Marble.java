@@ -48,6 +48,7 @@ public class Marble {
 		}
 	}
 	
+	//Is the Marble at the bottom right position?
 	public boolean endOfBoard() {
 		return ((arrayX == boardDimensions-1 && arrayY == boardDimensions-1) || this.fixed);
 	}

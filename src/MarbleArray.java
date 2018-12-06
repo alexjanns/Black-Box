@@ -167,14 +167,16 @@ public class MarbleArray {
 			if(fixedUpperIndex == 0 && xorUpperIndex == 0) {
 				fixedUpperIndex = xorUpperIndex = -1;
 			}
-			marbles[i] = new Marble(0,0, boardDim);
-			while(!checkPosition(marbles[i])) {
-				marbles[i] = marbles[i].advance();
-			}
-			for(; i < length; i++) {
-				marbles[i] = marbles[i-1].advance();
+			if(i < marbles.length) {
+				marbles[i] = new Marble(0,0, boardDim);
 				while(!checkPosition(marbles[i])) {
 					marbles[i] = marbles[i].advance();
+				}
+				for(; i < length; i++) {
+					marbles[i] = marbles[i-1].advance();
+					while(!checkPosition(marbles[i])) {
+						marbles[i] = marbles[i].advance();
+					}
 				}
 			}
 		}

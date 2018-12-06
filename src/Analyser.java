@@ -5,6 +5,8 @@ public class Analyser {
 	private ArrayList<Coordinates> forbiddenPos;
 	private ArrayList<Coordinates> fixedPos;
 	private ArrayList<XORMarble> xorPos;
+	private int boardDim;
+	private int marbleCount;
 	private boolean impossible;
 	
 	public ArrayList<Coordinates> getForbidden() {
@@ -20,8 +22,8 @@ public class Analyser {
 	}
 	
 	private void analyse(ArrayList<Coordinates> input) {
-		int boardDim = input.get(0).getFirst();
-		int marbleCount = input.get(0).getSecond();
+		boardDim = input.get(0).getFirst();
+		marbleCount = input.get(0).getSecond();
 		input.remove(0);
 		
 		//Special case: Does our input only consist of hits and nothing else?
@@ -67,84 +69,76 @@ public class Analyser {
 					}	
 				}
 				iteration++;
-			} else if(marbleCount > 0){
-				//Do we have a direct hit?
-				if(!input.contains(new Coordinates(iteration+1))) {
-					//No hit, so check for deflections
-					for(int j = 0; j < boardDim; j++) {
-						if(input.contains(new Coordinates(iteration+1, boardDim*4-j))){
-							Coordinates toAdd = new Coordinates(iteration+1, j+1); //Array Coordinates
-							if(!fixedPos.contains(toAdd)) {
-								fixedPos.add(toAdd);
-								marbleCount--;
-							}
-							break;
+			} else if(marbleCount > 0) {
+				//Doesn't pass through
+				//Check for deflections
+				for(int j = 0; j < boardDim; j++) {
+					if(input.contains(new Coordinates(iteration+1, boardDim*4-j))){
+						Coordinates toAdd = new Coordinates(iteration+1, j+1); //Array Coordinates
+						if(!fixedPos.contains(toAdd)) {
+							fixedPos.add(toAdd);
+							marbleCount--;
 						}
+						break;
 					}
-					for(int j = boardDim-1; j >= 0; j--) {
-						if(input.contains(new Coordinates(boardDim*3-iteration, boardDim*4-j))){
-							Coordinates toAdd = new Coordinates(iteration+1, j+1); //Array Coordinates
-							if(!fixedPos.contains(toAdd)) {
-								fixedPos.add(toAdd);
-								marbleCount--;
-							}
-							break;
-						}
-					}
-					
-					if(iteration > 0) {
-						//We came in knowing there was no deflection further out, so there can't be any marbles here
-						for(int i = 0; i < boardDim; i++) {
-							Coordinates toAdd = new Coordinates(iteration, i); //Array Coordinates
-							if(!forbiddenPos.contains(toAdd)) {
-								forbiddenPos.add(toAdd);
-							}	
-						}
-					}
-					
-					//No further reduction possible
-					keepGoing = false;
-				} else {
-					//We have a hit, so we may infer some XOR marbles
-					if(iteration == 0) {
-						//Only on the very edge do rays miss the board entirely
-						for(int k = boardDim*3+1; k <= boardDim*4; k++) {
-							boolean found = false;
-							for(int m = 0; m < input.size(); m++) {
-								if(input.get(m).getFirst() == k || input.get(m).getSecond() == k) {
-									found = true;
-									break;
-								}
-							}
-							if(!found) {
-								//If we're on a corner, we know where the marble is that causes this
-								if(boardDim*4-k == 0) {
-									Coordinates toAdd = new Coordinates(0, boardDim*4-k+1);
-									if(!fixedPos.contains(toAdd) && !checkXORforFixedPos(toAdd)) {
-										fixedPos.add(toAdd);
-										marbleCount--;
-									}
-								} else if(boardDim*4-k == boardDim-1) {
-									Coordinates toAdd = new Coordinates(0, boardDim*4-k-1);
-									if(!fixedPos.contains(toAdd) && !checkXORforFixedPos(toAdd)) {
-										fixedPos.add(toAdd);
-										marbleCount--;
-									}
-								} else {
-									XORMarble toAdd = new XORMarble(new Coordinates(0, boardDim*4-k+1), new Coordinates(0, boardDim*4-k-1));
-									if(!xorPos.contains(toAdd) && !(fixedPos.contains(toAdd.getFirstPosition()) || fixedPos.contains(toAdd.getSecondPosition()))) {
-										xorPos.add(toAdd);
-										marbleCount--;
-									}
-								}
-
-							}
-						}
-					}
-
-					//No further reduction possible
-					keepGoing = false;
 				}
+				for(int j = boardDim-1; j >= 0; j--) {
+					if(input.contains(new Coordinates(boardDim*3-iteration, boardDim*4-j))){
+						Coordinates toAdd = new Coordinates(iteration+1, j+1); //Array Coordinates
+						if(!fixedPos.contains(toAdd)) {
+							fixedPos.add(toAdd);
+							marbleCount--;
+						}
+						break;
+					}
+				}
+
+				if(iteration > 0) {
+					//We came in knowing there was no deflection further out, so there can't be any marbles here
+					for(int i = 0; i < boardDim; i++) {
+						Coordinates toAdd = new Coordinates(iteration, i); //Array Coordinates
+						if(!forbiddenPos.contains(toAdd)) {
+							forbiddenPos.add(toAdd);
+						}	
+					}
+				} else if(iteration == 0) {
+					//Only on the very edge do rays miss the board entirely
+					for(int k = boardDim*3+1; k <= boardDim*4; k++) {
+						boolean found = false;
+						for(int m = 0; m < input.size(); m++) {
+							if(input.get(m).getFirst() == k || input.get(m).getSecond() == k) {
+								found = true;
+								break;
+							}
+						}
+						if(!found) {
+							//If we're on a corner, we know where the marble is that causes this
+							if(boardDim*4-k == 0) {
+								Coordinates toAdd = new Coordinates(0, boardDim*4-k+1);
+								if(!fixedPos.contains(toAdd) && !checkXORforFixedPos(toAdd)) {
+									fixedPos.add(toAdd);
+									marbleCount--;
+								}
+							} else if(boardDim*4-k == boardDim-1) {
+								Coordinates toAdd = new Coordinates(0, boardDim*4-k-1);
+								if(!fixedPos.contains(toAdd) && !checkXORforFixedPos(toAdd)) {
+									fixedPos.add(toAdd);
+									marbleCount--;
+								}
+							} else {
+								XORMarble toAdd = new XORMarble(new Coordinates(0, boardDim*4-k+1), new Coordinates(0, boardDim*4-k-1));
+								if(!xorPos.contains(toAdd) && !(fixedPos.contains(toAdd.getFirstPosition()) || fixedPos.contains(toAdd.getSecondPosition()))) {
+									xorPos.add(toAdd);
+									marbleCount--;
+								}
+							}
+
+						}
+					}
+				}
+
+				//No further reduction possible
+				keepGoing = false;
 			}
 		}
 		
@@ -263,7 +257,7 @@ public class Analyser {
 					//No hit, so check for deflections
 					for(int j = 0; j < boardDim; j++) {
 						if(input.contains(new Coordinates(boardDim-iteration, boardDim+1+j))){
-							Coordinates toAdd = new Coordinates(boardDim-iteration-1, j+1); //Array Coordinates
+							Coordinates toAdd = new Coordinates(boardDim-iteration-2, j+1); //Array Coordinates
 							if(!fixedPos.contains(toAdd)) {
 								fixedPos.add(toAdd);
 								marbleCount--;
@@ -273,7 +267,7 @@ public class Analyser {
 					}
 					for(int j = boardDim-1; j >= 0; j--) {
 						if(input.contains(new Coordinates(boardDim*2+1+iteration, boardDim+1+j))){
-							Coordinates toAdd = new Coordinates(boardDim-iteration-1, j-1); //Array Coordinates
+							Coordinates toAdd = new Coordinates(boardDim-iteration-2, j-1); //Array Coordinates
 							if(!fixedPos.contains(toAdd)) {
 								fixedPos.add(toAdd);
 								marbleCount--;
@@ -434,7 +428,8 @@ public class Analyser {
 		
 		//One last thing...
 		checkValidity();
-	}
+		
+	}// void analyse(ArrayList<Coordinates> input)
 	
 	//Sets the flag that the board is deemed impossible to solve if any of the positions gleaned are invalid
 	private void checkValidity() {
@@ -457,6 +452,7 @@ public class Analyser {
 		}
 	}
 	
+	//Is a fixed position already used in an XOR position?
 	private boolean checkXORforFixedPos(Coordinates pos) {
 		for(int i = 0; i < xorPos.size(); i++) {
 			if(xorPos.get(i).getFirstPosition().equals(pos) || xorPos.get(i).getSecondPosition().equals(pos)) {
@@ -466,8 +462,28 @@ public class Analyser {
 		return false;
 	}
 	
+	//Is this board impossible to solve?
 	public boolean isImpossible() {
 		return impossible;
+	}
+	
+	public void printResult() {
+		Board result = new Board(boardDim);
+		
+		for(int i = 0; i < forbiddenPos.size(); i++) {
+			result.putContent(forbiddenPos.get(i).getFirst(), forbiddenPos.get(i).getSecond(), "x");
+		}
+		
+		for(int i = 0; i < fixedPos.size(); i++) {
+			result.putContent(fixedPos.get(i).getFirst(), fixedPos.get(i).getSecond(), "o");
+		}
+		
+		for(int i = 0; i < xorPos.size(); i++) {
+			result.putContent(xorPos.get(i).getFirstPosition().getFirst(), xorPos.get(i).getFirstPosition().getSecond(), "?");
+			result.putContent(xorPos.get(i).getSecondPosition().getFirst(), xorPos.get(i).getSecondPosition().getSecond(), "?");
+		}
+		
+		result.print();
 	}
 	
 	public Analyser(ArrayList<Coordinates> input) {

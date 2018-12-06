@@ -123,6 +123,13 @@ public class Board {
 		}
 	}
 	
+	//Put a String at the specified coordinates
+	public void putContent(int x, int y, String cont) {
+		if(x >= 0 && x < dimension && y >= 0 && y < dimension) {
+			board[x][y].setContent(cont);
+		}
+	}
+	
 	//Fill the board with a fixed number of marbles at random places
 	public void fillWithMarbles(int num) {
 		if(num > dimension*dimension || num <= 0) {
