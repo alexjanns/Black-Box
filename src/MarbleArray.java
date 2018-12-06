@@ -38,7 +38,9 @@ public class MarbleArray {
 		//Advance XOR marbles
 		if(xorUpperIndex >= 0) {
 			for(int i = xorUpperIndex; i > fixedUpperIndex; i--) {
-				marbles[i] = marbles[i].advance();
+				do {
+					marbles[i] = marbles[i].advance();
+				}while(!checkPosition(marbles[i]));
 				marbles[i].xorFlipFlag();
 				if(marbles[i].wasMovedLastTime()) {
 					break;
@@ -62,7 +64,7 @@ public class MarbleArray {
 		} else if(m.isXOR()) {
 			return checkXORPositions(m.getArrayCoordinates());
 		} else {
-			Coordinates test = m.advance().getArrayCoordinates();
+			Coordinates test = m.getArrayCoordinates();
 			return !forbiddenPos.contains(test) && !fixedMarbles.contains(test) && !checkXORPositions(test);
 		}
 	}
@@ -93,7 +95,7 @@ public class MarbleArray {
 			return true;
 		} else if(marbles[index].isXOR()) {
 			return marbles[index].wasMovedLastTime();
-		} else if(index == marbles.length-1 && !marbles[index].isXOR()) {
+		} else if(index > xorUpperIndex) {
 			if(!marbles[index].endOfBoard()) {
 				Marble temp = new Marble(marbles[index].getArrayX(), marbles[index].getArrayY(), marbles[index].getDimension());
 				temp = temp.advance();
@@ -107,8 +109,6 @@ public class MarbleArray {
 			} else {
 				return true;
 			}
-		} else if(index < marbles.length-1 && index >= 0) {
-			return (marbles[index].advance().equals(marbles[index+1]) && (!marbles[index+1].isXOR() || !marbles[index+1].isFixed()));
 		} else {
 			System.out.println("MarbleArray.endPosition(index): supplied index was out of bounds. Returning true by default.");
 			return true;
@@ -159,23 +159,21 @@ public class MarbleArray {
 			for(; i < fixedMarbles.size(); i++) {
 				marbles[i] = new Marble(fixedMarbles.get(i).getFirst(), fixedMarbles.get(i).getSecond(), boardDim, true);
 			}
-			fixedUpperIndex = i;
-			for(; i < xorPos.size(); i++) {
-				marbles[i] = new Marble(xorPos.get(i), boardDim);
+			fixedUpperIndex = i-1;
+			for(i = 0; i < xorPos.size(); i++) {
+				marbles[fixedUpperIndex+1+i] = new Marble(xorPos.get(i), boardDim, false);
 			}
-			xorUpperIndex = i;
-			if(fixedUpperIndex == 0 && xorUpperIndex == 0) {
-				fixedUpperIndex = xorUpperIndex = -1;
-			}
-			if(i < marbles.length) {
-				marbles[i] = new Marble(0,0, boardDim);
-				while(!checkPosition(marbles[i])) {
-					marbles[i] = marbles[i].advance();
+			xorUpperIndex = fixedUpperIndex+i;
+			if(xorUpperIndex < marbles.length-1) {
+				i = 1;
+				marbles[xorUpperIndex+i] = new Marble(0,0, boardDim);
+				while(!checkPosition(marbles[xorUpperIndex+i])) {
+					marbles[xorUpperIndex+i] = marbles[xorUpperIndex+i].advance();
 				}
-				for(; i < length; i++) {
-					marbles[i] = marbles[i-1].advance();
-					while(!checkPosition(marbles[i])) {
-						marbles[i] = marbles[i].advance();
+				for(i++; xorUpperIndex+i < length; i++) {
+					marbles[xorUpperIndex+i] = marbles[xorUpperIndex+i-1].advance();
+					while(!checkPosition(marbles[xorUpperIndex+i])) {
+						marbles[xorUpperIndex+i] = marbles[xorUpperIndex+i].advance();
 					}
 				}
 			}

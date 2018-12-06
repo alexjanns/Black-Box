@@ -69,7 +69,7 @@ public class Marble {
 				
 				return new Marble(newX, newY, boardDimensions);
 			} else {
-				return new Marble(new XORMarble(positions.getSecondPosition(), positions.getFirstPosition()), boardDimensions);
+				return new Marble(new XORMarble(positions.getSecondPosition(), positions.getFirstPosition()), boardDimensions, xorMovedLastTime);
 			}
 		} else {
 			return this;
@@ -134,12 +134,12 @@ public class Marble {
 		xorMovedLastTime = false;
 	}
 	
-	public Marble(XORMarble xorm, int d) {
+	public Marble(XORMarble xorm, int d, boolean flag) {
 		boardDimensions = d;
 		positions = xorm;
+		xorMovedLastTime = flag;
 		arrayX = positions.getFirstPosition().getFirst();
 		arrayY = positions.getFirstPosition().getSecond();
-		xorMovedLastTime = false;
 	}
 
 }
