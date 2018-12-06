@@ -24,6 +24,36 @@ public class Analyser {
 		int marbleCount = input.get(0).getSecond();
 		input.remove(0);
 		
+		//Special case: Does our input only consist of hits and nothing else?
+		boolean specialCase = true;
+		if(input.size() == 4*boardDim && marbleCount >= 4*boardDim-4) {
+			for(int i = 1; i <= input.size(); i++) {
+				if(!input.contains(new Coordinates(i))) {
+					specialCase = false;
+					break;
+				}
+			}
+		} else {
+			specialCase = false;
+		}
+		
+		if(specialCase) {
+			for(int j = 0; j < boardDim; j++) {
+				for(int i = 0; i < boardDim; i++) {
+					if(j == 0 || j == boardDim-1) {
+						fixedPos.add(new Coordinates(i, j));
+					} else {
+						fixedPos.add(new Coordinates(0, j));
+						fixedPos.add(new Coordinates(boardDim-1, j));
+						break;
+					}
+				}
+			}
+			checkValidity();
+			return;
+		}
+		
+		//Normal preprocessing
 		boolean keepGoing = true;
 		int iteration = 0;
 		//Look at the left edge
