@@ -8,6 +8,7 @@ public class Marble {
 	private int arrayY;
 	private boolean fixed;
 	private XORMarble positions;
+	private boolean xorMovedLastTime;
 	
 	public int getArrayX() {
 		return arrayX;
@@ -17,12 +18,26 @@ public class Marble {
 		return arrayY;
 	}
 	
+	public int getDimension() {
+		return boardDimensions;
+	}
+	
 	public Coordinates getGameCoordinates() {
 		return new Coordinates(arrayX+1, arrayY+boardDimensions+1);
 	}
 	
 	public Coordinates getArrayCoordinates() {
 		return new Coordinates(arrayX, arrayY);
+	}
+	
+	public boolean wasMovedLastTime() {
+		return xorMovedLastTime;
+	}
+	
+	public void xorFlipFlag() {
+		if(positions != null) {
+			xorMovedLastTime = !xorMovedLastTime;
+		}
 	}
 	
 	//Explicit setting of marble position
@@ -34,7 +49,7 @@ public class Marble {
 	}
 	
 	public boolean endOfBoard() {
-		return (arrayX == boardDimensions-1 && arrayY == boardDimensions-1);
+		return ((arrayX == boardDimensions-1 && arrayY == boardDimensions-1) || this.fixed);
 	}
 	
 	//Advance the marble by one cell to the right. Roll over into the next row if it would go out of bounds.
@@ -106,6 +121,7 @@ public class Marble {
 		boardDimensions = d;
 		fixed = false;
 		positions = null;
+		xorMovedLastTime = false;
 	}
 	
 	public Marble(int x, int y, int d, boolean fix) {
@@ -114,6 +130,7 @@ public class Marble {
 		boardDimensions = d;
 		fixed = fix;
 		positions = null;
+		xorMovedLastTime = false;
 	}
 	
 	public Marble(XORMarble xorm, int d) {
@@ -121,6 +138,7 @@ public class Marble {
 		positions = xorm;
 		arrayX = positions.getFirstPosition().getFirst();
 		arrayY = positions.getFirstPosition().getSecond();
+		xorMovedLastTime = false;
 	}
 
 }

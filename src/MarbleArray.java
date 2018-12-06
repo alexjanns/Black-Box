@@ -7,28 +7,45 @@ public class MarbleArray {
 	private ArrayList<Coordinates> forbiddenPos;
 	private ArrayList<Coordinates> fixedMarbles;
 	private ArrayList<XORMarble> xorPos;
+	private int fixedUpperIndex;
+	private int xorUpperIndex;
 	
 	public void advance() {
-		if(!endPosition(marbles.length-1)) {
-			do {
-				marbles[marbles.length-1] = marbles[marbles.length-1].advance();
-			} while(!checkPosition(marbles[marbles.length-1]));
-		} else {
-			for(int i = marbles.length-1; i >= 0; i--) {
-				if(!endPosition(i)) {
-					do {
-						marbles[i] = marbles[i].advance();
-					} while(!checkPosition(marbles[i]));
-					for(int j = i+1; j < marbles.length; j++) {
-						marbles[j] = marbles[j-1].advance();
-						while(!checkPosition(marbles[j])) {
-							marbles[j] = marbles[j].advance();
+		//Advance non-restricted marbles (only once all XOR configurations have been tested)
+		if(allXORPositionsTested()) {
+			if(!endPosition(marbles.length-1) && !marbles[marbles.length-1].isXOR()) {
+				do {
+					marbles[marbles.length-1] = marbles[marbles.length-1].advance();
+				} while(!checkPosition(marbles[marbles.length-1]));
+			} else if(marbles.length-1 != xorUpperIndex){
+				for(int i = marbles.length-1; i > xorUpperIndex; i--) {
+					if(!endPosition(i)) {
+						do {
+							marbles[i] = marbles[i].advance();
+						} while(!checkPosition(marbles[i]));
+						for(int j = i+1; j < marbles.length; j++) {
+							marbles[j] = marbles[j-1].advance();
+							while(!checkPosition(marbles[j])) {
+								marbles[j] = marbles[j].advance();
+							}
 						}
+						break;
 					}
+				}
+			}
+		}
+		
+		//Advance XOR marbles
+		if(xorUpperIndex >= 0) {
+			for(int i = xorUpperIndex; i > fixedUpperIndex; i--) {
+				marbles[i] = marbles[i].advance();
+				marbles[i].xorFlipFlag();
+				if(marbles[i].wasMovedLastTime()) {
 					break;
 				}
 			}
 		}
+		
 	}
 	
 	public Marble access(int index) {
@@ -41,13 +58,21 @@ public class MarbleArray {
 	
 	private boolean checkPosition(Marble m) {
 		if(m.isFixed()) {
-			return !fixedMarbles.contains(m.getArrayCoordinates());
+			return fixedMarbles.contains(m.getArrayCoordinates());
 		} else if(m.isXOR()) {
-			return !checkXORPositions(m.getArrayCoordinates());
+			return checkXORPositions(m.getArrayCoordinates());
 		} else {
 			Coordinates test = m.advance().getArrayCoordinates();
 			return !forbiddenPos.contains(test) && !fixedMarbles.contains(test) && !checkXORPositions(test);
 		}
+	}
+	
+	private boolean allXORPositionsTested() {
+		boolean result = true;
+		for(int i = xorUpperIndex; i > fixedUpperIndex; i--) {
+			result = result && marbles[i].wasMovedLastTime();
+		}
+		return result;
 	}
 	
 	private boolean checkXORPositions(Coordinates test) {
@@ -66,8 +91,22 @@ public class MarbleArray {
 	private boolean endPosition(int index) {
 		if(marbles[index].isFixed()) {
 			return true;
-		}else if(index == marbles.length-1) {
-			return marbles[index].endOfBoard();
+		} else if(marbles[index].isXOR()) {
+			return marbles[index].wasMovedLastTime();
+		} else if(index == marbles.length-1 && !marbles[index].isXOR()) {
+			if(!marbles[index].endOfBoard()) {
+				Marble temp = new Marble(marbles[index].getArrayX(), marbles[index].getArrayY(), marbles[index].getDimension());
+				temp = temp.advance();
+				while(!checkPosition(temp)) {
+					temp = temp.advance();
+					if(temp.endOfBoard()) {
+						return true;
+					}
+				}
+				return false;
+			} else {
+				return true;
+			}
 		} else if(index < marbles.length-1 && index >= 0) {
 			return (marbles[index].advance().equals(marbles[index+1]) && (!marbles[index+1].isXOR() || !marbles[index+1].isFixed()));
 		} else {
@@ -77,13 +116,16 @@ public class MarbleArray {
 	}
 	
 	public boolean finalPosition() {
-		boolean  result = endPosition(0);
-		for(int i = 1; i < marbles.length; i++) {
+		boolean  result = endPosition(marbles.length-1);
+		for(int i = marbles.length-2; i > xorUpperIndex; i--) {
 			boolean temp = endPosition(i);
 			result = result && temp;
 			if(!result) {
 				break;
 			}
+		}
+		if(result) {
+			result = result && allXORPositionsTested();
 		}
 		
 		return result;
@@ -93,7 +135,9 @@ public class MarbleArray {
 	public MarbleArray(int length, int boardDim) {
 		forbiddenPos = new ArrayList<Coordinates>();
 		fixedMarbles = new ArrayList<Coordinates>();
+		fixedUpperIndex = -1;
 		xorPos = new ArrayList<XORMarble>();
+		xorUpperIndex = -1;
 		if(length >= 1) {
 			marbles = new Marble[length];
 			marbles[0] = new Marble(0, 0, boardDim);
@@ -103,6 +147,7 @@ public class MarbleArray {
 		}	
 	}
 	
+	//Constructor for preprocessed input.
 	public MarbleArray(int length, int boardDim, ArrayList<Coordinates> forbidden, ArrayList<Coordinates> fixed, ArrayList <XORMarble> xor) {
 		forbiddenPos = forbidden;
 		fixedMarbles = fixed;
@@ -114,14 +159,17 @@ public class MarbleArray {
 			for(; i < fixedMarbles.size(); i++) {
 				marbles[i] = new Marble(fixedMarbles.get(i).getFirst(), fixedMarbles.get(i).getSecond(), boardDim, true);
 			}
+			fixedUpperIndex = i;
 			for(; i < xorPos.size(); i++) {
 				marbles[i] = new Marble(xorPos.get(i), boardDim);
 			}
-			if(i == 0) {
-				marbles[0] = new Marble(0,0, boardDim);
-				while(!checkPosition(marbles[0])) {
-					marbles[0] = marbles[0].advance();
-				}
+			xorUpperIndex = i;
+			if(fixedUpperIndex == 0 && xorUpperIndex == 0) {
+				fixedUpperIndex = xorUpperIndex = -1;
+			}
+			marbles[i] = new Marble(0,0, boardDim);
+			while(!checkPosition(marbles[i])) {
+				marbles[i] = marbles[i].advance();
 			}
 			for(; i < length; i++) {
 				marbles[i] = marbles[i-1].advance();
