@@ -304,8 +304,8 @@ public class Analyser {
 									marbleCount--;
 								}
 							} else {
-								XORMarble toAdd = new XORMarble(new Coordinates(boardDim-1, boardDim*2-k-2), new Coordinates(boardDim-1, boardDim*2-k-4));
-								if(!xorPos.contains(toAdd) && (!checkXORforOverlap(toAdd)) && !(fixedPos.contains(toAdd.getFirstPosition()) || fixedPos.contains(toAdd.getSecondPosition()))) {
+								XORMarble toAdd = new XORMarble(new Coordinates(boardDim-1, k-boardDim-2), new Coordinates(boardDim-1, k-boardDim));
+								if(!xorPos.contains(toAdd) && !checkXORforOverlap(toAdd) && !(fixedPos.contains(toAdd.getFirstPosition()) || fixedPos.contains(toAdd.getSecondPosition()))) {
 									xorPos.add(toAdd);
 									marbleCount--;
 								}
@@ -393,7 +393,7 @@ public class Analyser {
 								}
 							} else {
 								XORMarble toAdd = new XORMarble(new Coordinates(boardDim*3-k+1, boardDim-1), new Coordinates(boardDim*3-k-1, boardDim-1));
-								if(!xorPos.contains(toAdd) && (!checkXORforOverlap(toAdd)) && !(fixedPos.contains(toAdd.getFirstPosition()) || fixedPos.contains(toAdd.getSecondPosition()))) {
+								if(!xorPos.contains(toAdd) && !checkXORforOverlap(toAdd) && !(fixedPos.contains(toAdd.getFirstPosition()) || fixedPos.contains(toAdd.getSecondPosition()))) {
 									xorPos.add(toAdd);
 									marbleCount--;
 								}
