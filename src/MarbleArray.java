@@ -91,6 +91,9 @@ public class MarbleArray {
 	
 	//Constructor for brute-forcing. No restrictions on marble positions
 	public MarbleArray(int length, int boardDim) {
+		forbiddenPos = new ArrayList<Coordinates>();
+		fixedMarbles = new ArrayList<Coordinates>();
+		xorPos = new ArrayList<XORMarble>();
 		if(length >= 1) {
 			marbles = new Marble[length];
 			marbles[0] = new Marble(0, 0, boardDim);

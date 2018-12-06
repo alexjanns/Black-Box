@@ -10,15 +10,27 @@ public class Board {
 	
 	//How to output in ASCII in O(n^2) (well, not that there's much choice)
 	private String toASCII() {
-		//Start new string with one leading space (top left diagonal)
-		String result = new String(" ");
+		//Start new string with two leading spaces (top left diagonal)
+		String result = new String();
 		
 		//Add top column numbers to output
-		for(int n = 0; n < dimension; n++) {
-			result = result.concat(String.valueOf(n+1));
-			if(n == dimension-1) {
-				//Add top right diagonal empty space and line break;
-				result = result.concat(" \n");
+		for(int i = 0; i < 2; i++) {
+			for(int n = 1; n <= dimension; n++) {
+				if(n == 1) {
+					result = result.concat("  ");
+				}
+				if(i == 0) {
+					result = result.concat(String.valueOf((int)n/10));
+				} else {
+					result = result.concat(String.valueOf(n%10));
+				}
+				if(n == dimension) {
+					//Add top right diagonal empty space and line break;
+					result = result.concat("  \n");
+					if(i == 2) {
+						result = "  ".concat(result);
+					}
+				}
 			}
 		}
 		
@@ -27,29 +39,36 @@ public class Board {
 			for(int j = 0; j < dimension; j++) {
 				if(j == 0) {
 					int leftLineNumber = (dimension*4)-i;
-					result = result.concat(String.valueOf(leftLineNumber));
+					result = result.concat(String.valueOf(leftLineNumber/10));
+					result = result.concat(String.valueOf(leftLineNumber%10));
 				}
 				
 				result = result.concat(board[j][i].getContent());
 				
 				if(j == dimension - 1) {
 					int rightLineNumber = dimension+i+1;
-					result = result.concat(String.valueOf(rightLineNumber));
+					result = result.concat(String.valueOf(rightLineNumber/10));
+					result = result.concat(String.valueOf(rightLineNumber%10));
 					result = result.concat("\n");
 				}
 			}
 		}
 		
 		//Add bottom line numbers to output
-		for(int m = 0; m < dimension; m++) {
-			if(m == 0) {
-				result = result.concat(" ");
-			}
-			
-			result = result.concat(String.valueOf(new Integer((dimension*3)-m)));
-			
-			if(m == dimension-1) {
-				result = result.concat(" \n");
+		for(int i = 0; i < 2; i++) {
+			for(int m = 0; m < dimension; m++) {
+				if(m == 0) {
+					result = result.concat("  ");
+				}
+				if(i == 0) {
+					result = result.concat(String.valueOf((int)new Integer((dimension*3)-m)/10));
+				} else {
+					result = result.concat(String.valueOf(new Integer((dimension*3)-m)%10));
+				}
+				
+				if(m == dimension-1) {
+					result = result.concat("  \n");
+				}
 			}
 		}
 		
