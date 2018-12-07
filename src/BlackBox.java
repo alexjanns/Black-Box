@@ -80,7 +80,7 @@ public class BlackBox {
 				System.out.println("Restart program? Y/N");
 				in = scanner.nextLine();
 			} while(!in.equals("Y") && !in.equals("y") && !in.equals("N") && !in.equals("n"));
-		} while(!in.equals("N") || in.equals("n"));
+		} while(!in.equals("N") || !in.equals("n"));
 		
 		scanner.close();
 
