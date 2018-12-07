@@ -16,16 +16,17 @@ public class Solver {
 		Checker checker = new Checker(input);
 		
 		solution = marbleArrayToBoard(marbles);
-		System.out.println("\033[s");
 		solution.print();
-		System.out.println("\033[u");
+		//System.out.println("\033[<"+(boardDimension+4)+">A");
+		//System.out.println("\033[<"+(boardDimension+4)+">D");
 		boolean checkresult = checker.check(solution);
 		
 		while(!marbles.finalPosition() && !checkresult) {
 			marbles.advance();
 			solution = marbleArrayToBoard(marbles);
 			solution.print();
-			System.out.println("\033[u");
+			//System.out.println("\033[<"+(boardDimension+4)+">A");
+			//System.out.println("\033[<"+(boardDimension+4)+">D");
 			checkresult = checker.check(solution);
 		}
 		
@@ -53,12 +54,16 @@ public class Solver {
 		
 		solution = marbleArrayToBoard(marbles);
 		solution.print();
+		//System.out.println("\033[<"+(boardDimension+4)+">A");
+		//System.out.println("\033[<"+(boardDimension+4)+">D");
 		boolean checkresult = checker.check(solution);
 		
 		while(!marbles.finalPosition() && !checkresult) {
 			marbles.advance();
 			solution = marbleArrayToBoard(marbles);
 			solution.print();
+			//System.out.println("\033[<"+(boardDimension+4)+">A");
+			//System.out.println("\033[<"+(boardDimension+4)+">D");
 			checkresult = checker.check(solution);
 		}
 		
